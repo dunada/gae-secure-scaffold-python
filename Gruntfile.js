@@ -94,6 +94,37 @@ module.exports = function(grunt) {
         src: '**'
       }
     },
+    
+    //Watch directories and run tasks
+    watch: {
+      copy: {
+        files: ['src/*.*','static/*.*','templates/*.*','third_party/*.*'],
+        tasks: ['copy:source','copy:static','copy:templates','copy:third_party_js','copy:third_party_py'],
+      },
+      closure: {
+        files: ['closure-library/*.*', 'js/*.*'],
+        tasks: ['closure'],
+      },
+      closureTemplate: {
+        files: ['templates/soy/*.*'],
+        tasks: ['closureTemplate'],
+      }
+    },
+
+    parallel: {
+      server: {
+        options: {
+          stream: true
+        },
+        tasks: [{
+          grunt: true,
+          args: ['watch']
+        }, {
+          grunt: true,
+          args: ['appengine:run:app']
+        }]
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-appengine');
@@ -101,8 +132,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-closure-soy');
   grunt.loadNpmTasks('grunt-closure-tools');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-parallel');
 
   grunt.registerTask('nop', function() {});
+
+  grunt.registerTask('server', ['parallel:server']);
 
   grunt.registerTask('yaml', 'Generates app.yaml',
       function() {
@@ -149,11 +184,25 @@ module.exports = function(grunt) {
         });
 
   grunt.registerTask('default',
-      ['copy:source', 'copy:static', 'copy:templates',
-       'copy:third_party_js', 'copy:third_party_py',
+    [
+      'copy:source', 'copy:static', 'copy:templates',
+      'copy:third_party_js', 'copy:third_party_py',
+      'closure', 'closureTemplate', 'yaml'
+    ]
+  );
+
+  grunt.registerTask('closure',
+    [
+      grunt.config.get('build.use_closure') ? 'closureBuilder' : 'nop'
+    ]
+  );
+
+  grunt.registerTask('closureTemplate',
+    [
       grunt.config.get('build.use_closure_templates') ? 'closureSoys' : 'nop',
-      grunt.config.get('build.use_closure_templates') ? 'copy:soyutils' : 'nop',
-      grunt.config.get('build.use_closure') ? 'closureBuilder' : 'nop',
-      'yaml']);
+      grunt.config.get('build.use_closure_templates') ? 'copy:soyutils' : 'nop'
+    ]
+  );
+
 };
 

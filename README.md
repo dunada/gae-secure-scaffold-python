@@ -116,16 +116,11 @@ To run the development appserver locally:
 
 1. `grunt clean`
 1. `grunt`
-1. `grunt appengine:run:app`
+1. `grunt server`
 
-Note that the development appserver will be running on a snapshot of code
-at the time you run it.  If you make changes, you can run the various Grunt
-tasks in order to propagate them to the local appserver.  For instance:
-
-`grunt copy` will refresh the source code (local and third party), static files,
-and templates.  You can run `grunt closureSoys` and/or `grunt closureBuilder`
-before `grunt copy` if you need to rebuild your Closure Templates or Closure
-Javascript.
+A grunt server task will run appenine server and will watch the src, static, 
+template, third_party, js and closure-library directories to run related tasks 
+to update the snapshot of code when the code change.
 
 If you are not using Grunt, simply run:
 
